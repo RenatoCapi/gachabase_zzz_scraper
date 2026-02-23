@@ -1,0 +1,6 @@
+services:
+  gamegachascraper:
+    image: gamegachascraper
+    build:
+      context: .
+      dockerfile: ./Dockerfile
