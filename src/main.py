@@ -1,9 +1,9 @@
 from constants import GACHABASE_URL_CHARS
-from gachabase_webscraper import _get_char_skillkit
+from gachabase_webscraper import selenium_test
 
 
 def main():
-    _get_char_skillkit(GACHABASE_URL_CHARS[0])
+    selenium_test()
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,8 @@
 services:
   gamegachascraper:
     image: gamegachascraper
+    volumes:
+      - ./output:/app/output # Mapeia o diretório atual para /app no contêiner
     build:
       context: .
       dockerfile: ./Dockerfile

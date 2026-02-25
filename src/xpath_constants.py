@@ -8,44 +8,51 @@ GAMEGACHA_SKILL_MAP = {
 }
 #BASE                                                                    SUBSKILLS 
 "/html/body/div[1]/div[1]/main/article/section[2]"
+
 #skill_raw
 "/div/section[{X}]"
+
 #skill_data
 "/div[2]/div[2]/div"
 
 
-XPATH_GAMEGACHA_SKILLS = "/html/body/div[1]/div[1]/main/article/section[2]"
+
+
+XPATH_BASE_GAMEGACHA_SKILLS = "/html/body/div[1]/div[1]/main/article/section[2]"
+
+XPATH_CLOSE_BUTTON = "/html/body/div[9]/div/div/button"
 
 GAMEGACHA_SKILLS_SECTION_MAP = {
-    "BASIC":"1",
-    "DODGE":"2",
-    "ASSIST":"3",
-    "SPECIAL":"4",
-    "CHAIN":"5",
+    1: "BASIC",
+    2: "DODGE",
+    3: "ASSIST",
+    4: "SPECIAL",
+    5: "CHAIN",
 }
 
 XPATH_SKILL_TITLE_ID = 1
 SKILL_DATA_ID = 2
 
-def _get_skill_xpath(id:int) -> str:
+# XPATH_BASE_GAMEGACHA_SKILLS / 
+def get_skill_xpath(id:int) -> str:
     return f"/div/section[{id}]"
 
-XPATH_SKILL_DESCS = "/div[2]/div[1]"
-def _get_skill_desc_xpath(id:int):
+# get_skill_xpath() /
+XPATH_SKILL_DESCS = "./div[2]/div[1]"
+def get_skill_desc_xpath(id:int):
     return f"/div[{id}]"
 
-XPATH_SKILL_DATA = "/div[2]/div[2]/div"
+# get_skill_xpath() /
+XPATH_SUB_SKILLS_DATA = "./div[2]/div[2]/div/div"
 
-SUBSKILL_DESC = 1
-SUBSKILL_DATA = 2
-def _get_subskill_xpath(id:int) -> str:
+# XPATH_SUB_SKILLS_DATA /
+XPATH_SLIDER_SUB_SKILLS = "./div/div[2]/div/div[2]"
+
+
+def get_subskill_xpath(id:int) -> str:
     return f"/div[{id}]"
 
-
-HIT_TITLE_ID = 1
-HIT_DATA_ID = 2
-def _get_hit_xpath(id:int):
+def get_hit_xpath(id:int):
     return f"/div[2]/div/div[{id}]"
 
-HIT_NAMES = "/div[1]"
-HIT_DATA = "/div[2]"
+

@@ -1,7 +1,19 @@
 export interface char {
     skillKit: SkillKit
-    hitMap: { [id: string]: SimpleHit }
+    hitMap: HitMap
 }
+
+export type HitMap = {
+    [id: string]: SimpleHit
+}
+
+export type SimpleHit = {
+    anomalyBuildup: number,
+    miasmaDepletion: number,
+    dmg: number[],
+    daze: number[],
+}
+
 export type SkillKit = {
     [id: string]: Skill
 }
@@ -22,24 +34,9 @@ export type ComplexHitData = {
     name: string,
     formula: string, // agrupar danos que usam multiplos simpleHits
     // anby ex = [1521008]*3 + [1521009]
-    energyCost: number,
-    adrenalineCost: number,
-    dmg: number[], // resultado da conta dos simple hits
-    daze: number[],
-    simpleHit: string[]
-}
-
-
-
-export type SimpleHit = {
-    id: string,
-    energyGain: number,
-    anomalyBuildup: number,
-    decibelsGain: number,
-    adrenalineGain: number,
-    miasmaDepletion: number,
-    dmg: number[],
-    daze: number[],
+    hitID: string[]
+    dmg: string[], // resultado da conta dos simple hits
+    daze: string[],
 }
 
 /*
