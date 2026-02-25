@@ -46,8 +46,9 @@ def get_skill_desc_xpath(id:int):
 XPATH_SUB_SKILLS_DATA = "./div[2]/div[2]/div/div"
 
 # XPATH_SUB_SKILLS_DATA /
-XPATH_SLIDER_SUB_SKILLS = "./div/div[2]/div/div[2]"
+XPATH_SLIDER_KNOB = "./div/div[2]/div/div[2]"
 
+XPATH_SLIDER_RAIL = "./div/div[2]/div/div[1]"
 
 def get_subskill_xpath(id:int) -> str:
     return f"/div[{id}]"

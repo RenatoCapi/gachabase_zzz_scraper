@@ -6,6 +6,12 @@ CHAR_ID_LIST:list[str] = [
     "1421","1431","1441","1451","1461","1471","1481","1491","1501","1331"
 ]
 
+CHAR_ID_LIST2 = [
+    "1501","1491","1431","1341","1481","1471","1502","1451","1051","1441","1301","1461","1401",
+    "1411","1391","1371","1421","1291","1331","1361","1381","1351","1321","1311","1201","1091",
+    "1161","1221","1171","1071","1261","1251","1271","1241","1211","1191","1181","1141","1041",
+    "1021","1101","1281","1111","1131","1081","1061","1121","1151","1031","1011"]
+
 HOYO_SkillID = {
     0: "Basic",
     1: "Special",
@@ -15,9 +21,7 @@ HOYO_SkillID = {
     6: "Assist",
 }
 
-GACHABASE_URL_CHARS = [
-    '/agents/1521/1521?lang=en&branch=beta', 
-    '/agents/1511/1511?lang=en&branch=beta', 
+GACHABASE_URL_CHARS = [ 
     '/agents/1501/aria3?lang=en&branch=beta', 
     '/agents/1491/sunna?lang=en&branch=beta', 
     '/agents/1431/ye-shunguang?lang=en&branch=beta', 
@@ -69,7 +73,7 @@ GACHABASE_URL_CHARS = [
 	'/agents/1031/nicole-demara?lang=en&branch=beta',
 	'/agents/1011/anby-demara?lang=en&branch=beta']
 
-URL_BASE_GACHABASE = "https://zzz.gachabase.net/"
+URL_BASE_GACHABASE = "https://zzz.gachabase.net"
 
 PARAM_LIST_AGENTS = "agents?lang=en&branch=beta"
 

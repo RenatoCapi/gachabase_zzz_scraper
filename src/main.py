@@ -1,9 +1,9 @@
 from constants import GACHABASE_URL_CHARS
-from gachabase_webscraper import selenium_test
+from gachabase_webscraper import write_all_chars_skills, write_char
 
 
 def main():
-    selenium_test()
+    write_all_chars_skills()
 
 if __name__ == "__main__":
     main()

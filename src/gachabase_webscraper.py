@@ -1,12 +1,13 @@
 import json
 import logging
+import math
 import os
 import re
-import time
 import traceback
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from bs4 import BeautifulSoup
 import requests
@@ -18,34 +19,40 @@ from xpath_constants import get_skill_xpath
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-logging.info("abrindo o browser...")
-options = webdriver.ChromeOptions() # type: ignore
-options.add_argument("--headless")
-browser = webdriver.Remote("http://172.17.0.2:4444/wd/hub", options=options) # type: ignore
+def start_session():
+    global browser
 
-browser.maximize_window()
-
-hit_map_aux = {}
+    logging.info("abrindo o browser...")
+    options = webdriver.ChromeOptions() # type: ignore
+    options.add_argument("--headless")
+    browser = webdriver.Remote("http://172.17.0.2:4444/wd/hub", options=options) # type: ignore
+    browser.maximize_window()
 
 def _get_char_url(char_url:str) -> str:
     return f"{URL_BASE_GACHABASE}/{char_url}"
 
 def _get_char_skillkit(param_char_url):
-    skillkit = {}
-    browser.get(URL_BASE_GACHABASE + param_char_url)
+    global hit_map_aux
+
+    
+    start_session()
 
     logging.info(f"acessando: '{URL_BASE_GACHABASE + param_char_url}'")
+    browser.get(URL_BASE_GACHABASE + param_char_url)
 
     #fechar o dialog
     close_button = browser.find_element(By.XPATH, XPATH_CLOSE_BUTTON)
     action = ActionChains(browser)
     action.click(close_button).perform()
 
+    skillkit = {}
     hit_map_aux = {}
+    
     for skill_id in range(1,6):
         logging.info(GAMEGACHA_SKILLS_SECTION_MAP[skill_id])
         skillkit[GAMEGACHA_SKILL_MAP[skill_id]] = _get_skill_data(skill_id)
 
+    browser.quit()
     return {
         'skillKit': skillkit,
         'hitMap': hit_map_aux
@@ -64,10 +71,11 @@ def _get_skill_data(skill_id:int):
         desc.append(str(BeautifulSoup(element_html,'html.parser')))
 
     return {
-        "skillId":skill_id,
-        "desc":desc,
+        "skillId": GAMEGACHA_SKILL_MAP[skill_id],
+        "desc": desc,
         "subSkills": _get_sub_skills_data(skill_id, element_skills)
     }
+
 
 
 def _get_sub_skills_data(skill_id:int, element_skills):
@@ -75,38 +83,49 @@ def _get_sub_skills_data(skill_id:int, element_skills):
     sub_skills = {}
     sub_skill_id = ""
 
-    for id, sub_skill_data in enumerate(sub_skills_data):
-        if id & 1 == 0:
-            sub_skill_id = sub_skill_data.find_element(By.XPATH,"./h3").text
-            slider = sub_skill_data.find_element(By.XPATH, XPATH_SLIDER_SUB_SKILLS)
-            logging.info(f'pegando {sub_skill_id}...')
-        else:
-            sub_skills[sub_skill_id] = lvl_skill_slider_manager(sub_skill_data, sub_skill_id, slider)
+    logging.info(f'iniciando manipulação do slider...')
+    slider_knob = sub_skills_data[0].find_element(By.XPATH, XPATH_SLIDER_KNOB)
+    slider_rail = sub_skills_data[0].find_element(By.XPATH, XPATH_SLIDER_RAIL)
+    action = ActionChains(browser)
+    reset_slider(action, slider_knob, slider_rail)
+
+    for count in range(1,17):
+        for id, sub_skill_data in enumerate(sub_skills_data):
+            if id & 1 == 0:
+                sub_skill_id_raw = sub_skill_data.find_element(By.XPATH,"./h3").text
+                sub_skill_id = re.sub(r":?\sSTATS$", "", sub_skill_id_raw)
+                
+                logging.info(f'pegando {sub_skill_id}...')
+            else:
+
+                if sub_skill_id not in sub_skills:
+                    sub_skills[sub_skill_id] = {}
+                sub_skills[sub_skill_id] = _get_complex_hits_data(sub_skill_data, sub_skill_id, sub_skills[sub_skill_id])
+            
+        move_slider_right(action, slider_knob, slider_rail)
     
     return sub_skills
 
+def reset_slider(action, knob, rail):
+    knob.click()
+    for _ in range(16):
+        action.send_keys(Keys.ARROW_LEFT)
 
-def lvl_skill_slider_manager(sub_skill_data, sub_skill_id, slider):
-    logging.info(f'iniciando manipulação do slider...')
+    action.perform()
+    logging.info(f"Slider resetado posição - {knob.get_attribute("aria-valuenow")}")
 
-    action = ActionChains(browser)
-    action.click_and_hold(slider).move_by_offset(-20*17,0).release().perform()
-    sub_skill = {}
-
-    for count in range(1,17):
-        print(slider.get_attribute("aria-valuenow"))
-        tables_element = sub_skill_data.find_elements(By.TAG_NAME,'tbody')
-        sub_skill = _get_complex_hits_data(tables_element[0], sub_skill_id, sub_skill)
-        _update_hit_map(tables_element[1])
-        action.click_and_hold(slider).move_by_offset(19,0).release().perform()
-
-
-    return sub_skill
+def move_slider_right(action, knob, rail):
+    knob.click()
+    action.send_keys(Keys.ARROW_RIGHT).perform()
+    slider_index = knob.get_attribute("aria-valuenow")
+    logging.info(f"skill lvl - {slider_index}")
+    
 
 
-def _get_complex_hits_data(tbody_element,sub_skill_id, sub_skill):
+def _get_complex_hits_data(sub_skill_data, sub_skill_id, sub_skill):
     logging.info(f'construindo a subSkill...')
-    tr_elements = tbody_element.find_elements(By.TAG_NAME,'tr')
+    tbodys_element = sub_skill_data.find_elements(By.TAG_NAME,'tbody')
+    tr_elements = tbodys_element[0].find_elements(By.TAG_NAME,'tr')
     
     for tr in tr_elements:
         complex_hit_id = ""
@@ -141,6 +160,9 @@ def _get_complex_hits_data(tbody_element,sub_skill_id, sub_skill):
             
             sub_skill[complex_hit_id][raw_name[1].lower()].append(multiplier)
 
+    if len(tbodys_element) == 2:
+        _update_hit_map(tbodys_element[1])
+
     return sub_skill
 
 
@@ -154,8 +176,8 @@ def find_hit_complex_id(raw:str) -> tuple:
 
 
 def _update_hit_map(tbody_element):
-     tr_elements = tbody_element.find_elements(By.TAG_NAME,'tr')
-     for tr in tr_elements:
+    tr_elements = tbody_element.find_elements(By.TAG_NAME,'tr')
+    for tr in tr_elements:
         html_tr = tr.get_attribute('outerHTML')
         th_soup = BeautifulSoup(html_tr, 'html.parser').find('th')
         tds_soup = BeautifulSoup(html_tr, 'html.parser').find_all('td')
@@ -172,12 +194,11 @@ def _update_hit_map(tbody_element):
                 "daze": [tds_soup[1].get_text(strip=True)],
             }
 
-
-def selenium_test():
+def write_char(index):
     try:
-        char = _get_char_skillkit(GACHABASE_URL_CHARS[0])
+        char = _get_char_skillkit(GACHABASE_URL_CHARS[index])
         folder_path = '/app/output'
-        file_name = f"{CHAR_ID_LIST[0]}.json"
+        file_name = f"{CHAR_ID_LIST2[index]}.json"
         complete_path = os.path.join(folder_path, file_name)
 
         logging.info(f'escrevendo no caminho {complete_path}')
@@ -186,12 +207,15 @@ def selenium_test():
             file.write(json.dumps(char))
         
     except Exception as e:
+        print(f"personagem - id: {CHAR_ID_LIST2[index]}")
         print(f"An exception occurred: {e}")
-        traceback.print_exc() 
+        traceback.print_exc()
 
-    finally:
-        browser.quit()
+def write_all_chars_skills():
+    for index in range(13,len(GACHABASE_URL_CHARS)):
+        write_char(index)
 
+    browser.quit()
 
 #usado uma vez pra pegar o mapa de urls
 def _get_char_url_list():
@@ -211,4 +235,4 @@ def _request_html_content(url: str):
 
 
 if __name__ == "__main__":
-    selenium_test()
+    write_all_chars_skills()
