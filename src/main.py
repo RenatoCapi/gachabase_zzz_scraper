@@ -3,7 +3,8 @@ from gachabase_webscraper import write_all_chars_skills, write_char
 
 
 def main():
-    write_all_chars_skills()
+    write_char(13)
+
 
 if __name__ == "__main__":
     main()
