@@ -31,7 +31,61 @@ def start_session():
     options.add_argument("--headless=new")
     options.add_argument("--window-size=1920,1080")
     browser = webdriver.Remote("http://172.17.0.2:4444/wd/hub", options=options)  # type: ignore
-    # browser.maximize_window()
+
+
+def _get_char(char_url):
+    load_character_page(char_url)
+    close_dialog()
+
+    char = {}
+    _get_meta_data(char)
+    # _get_stats_base()
+    # _get_char_skillkit()
+
+
+def _get_meta_data(char):
+    element_parent = browser.find_element(By.XPATH, XPATH_BASE_GACHABASE_META_DATA)
+
+    elements_charbase_data = element_parent.find_elements(By.TAG_NAME, "div")
+    char["name"] = elements_charbase_data[0].find_element(By.TAG_NAME, "h1").text
+    camp_raw = elements_charbase_data[0].find_element(By.TAG_NAME, "h2").text
+    char["camp"] = CAMP_ID[_get_first_word(camp_raw)]
+
+    char_metadata = elements_charbase_data[1].find_elements(By.TAG_NAME, "a")
+    char["rarity"] = RARITY_ID[char_metadata[0].text]
+    char["weaponType"] = WEAPON_TYPE_ID[char_metadata[2].text]
+    char["ElementType"] = ELEMENT_TYPE_ID[char_metadata[3].text]
+    char["hitType"] = [HIT_TYPE_ID[char_metadata[4].text]]
+    if len(char_metadata) > 5:
+        char["hitType"].append(HIT_TYPE_ID[char_metadata[5].text])
+
+    char["id"] = _find_id(char_metadata[-1].text)
+    return char
+    """return {
+        "skillKit": {},
+        "hitMap": {},
+        "staticStats": {},
+        "growthStat": {},
+        "coreGrowthStat": {},
+    }"""
+
+
+def _get_first_word(text):
+    pattern = r"^(\S*)"
+    match = re.search(pattern, text)
+    if match:
+        return match.group(1)
+
+    return "None"
+
+
+def _find_id(text):
+    pattern = rf"(\d{4})"
+    match = re.search(pattern, text)
+    if match:
+        return match.group(1)
+
+    return ""
 
 
 def _get_char_skillkit(char_url):

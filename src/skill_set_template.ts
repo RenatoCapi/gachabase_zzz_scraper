@@ -1,6 +1,32 @@
 export interface char {
+    id: string
+    name: string
+    weaponType: string
+    hitType: []
+    camp: string
     skillKit: SkillKit
     hitMap: HitMap
+    staticStats: StaticStats
+    growthStat: GrowthStat
+    coreGrowthStat: CoreGrowthStat
+}
+
+export type StaticStats = {
+    [id: string]: string
+}
+
+export type Stats = {
+    [id: string]: string
+}
+
+export type GrowthStat = {
+    base: number,
+    growth: number,
+    asc: number
+}
+
+export type CoreGrowthStat = {
+    [id: string]: number
 }
 
 export type HitMap = {

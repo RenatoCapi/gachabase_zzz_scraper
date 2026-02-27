@@ -113,3 +113,51 @@ HEADERS = {
     ),
     "Referer": "https://zzz.gachabase.net/",
 }
+
+RARITY_ID = {
+    "S Rank": "4",
+    "A Rank": "3",
+}
+
+WEAPON_TYPE_ID = {
+    "Attack": "1",
+    "Stun": "2",
+    "Anomaly": "3",
+    "Support": "4",
+    "Defense": "5",
+    "Rupture": "6",
+}
+
+HIT_TYPE_ID = {
+    "Slash": "101",
+    "Strike": "102",
+    "Pierce": "103",
+}
+
+ELEMENT_TYPE_ID = {
+    "Physical": "200",
+    "Honed Edge": "200",
+    "Fire": "201",
+    "Ice": "202",
+    "Frost": "202",
+    "Electric": "203",
+    "Ether": "205",
+    "Auric Ink": "205",
+}
+
+CAMP_ID = {
+    "None": "",
+    "Cunning": "1",
+    "Victoria": "2",
+    "Belobog": "3",
+    "Calydon": "4",
+    "Defense": "5",
+    "Hollow": "6",
+    "Criminal": "7",
+    "Stars": "8",
+    "Mockingbird": "9",
+    "Yunkui": "10",
+    "Spook": "11",
+    "Krampus": "12",
+    "Angels": "13",
+}
