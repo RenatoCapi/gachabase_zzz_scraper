@@ -146,18 +146,37 @@ ELEMENT_TYPE_ID = {
 }
 
 CAMP_ID = {
-    "None": "",
-    "Cunning": "1",
-    "Victoria": "2",
-    "Belobog": "3",
-    "Calydon": "4",
-    "Defense": "5",
-    "Hollow": "6",
-    "Criminal": "7",
-    "Stars": "8",
-    "Mockingbird": "9",
-    "Yunkui": "10",
-    "Spook": "11",
-    "Krampus": "12",
-    "Angels": "13",
+    "none": "",
+    "cunning": "1",
+    "victoria": "2",
+    "belobog": "3",
+    "calydon": "4",
+    "defense": "5",
+    "hollow": "6",
+    "criminal": "7",
+    "stars": "8",
+    "mockingbird": "9",
+    "yunkui": "10",
+    "spook": "11",
+    "krampus": "12",
+    "angels": "13",
 }
+
+STATS_BASE_ID = {
+    "Base HP": "11101",
+    "Base ATK": "12101",
+    "Base DEF": "13101",
+    "Base Impact": "12201",
+    "Base Energy Regen": "30501",
+    "CRIT Rate": "20101",
+    "CRIT DMG": "21101",
+    "PEN Ratio": "23101",
+    "Anomaly Mastery": "31201",
+    "Anomaly Proficiency": "31401",
+    "Sheer Force": "12301",
+    "Automatic Adrenaline Accumulation": "32001",
+}
+
+STATS_FLOAT_ROUND = ["30501", "20101", "21101", "23101", "32001"]
+
+BASE_ATTR_ID = ["11101", "12101", "13101"]

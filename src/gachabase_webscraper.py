@@ -7,14 +7,14 @@ import traceback
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from bs4 import BeautifulSoup
 import requests
 
+from metadata_parser import get_metadata
 from constants import *
+from skillkit_parser import get_char_skillkit
 from xpath_constants import *
-from xpath_constants import get_skill_xpath
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -37,71 +37,39 @@ def _get_char(char_url):
     load_character_page(char_url)
     close_dialog()
 
-    char = {}
-    _get_meta_data(char)
-    # _get_stats_base()
-    # _get_char_skillkit()
-
-
-def _get_meta_data(char):
-    element_parent = browser.find_element(By.XPATH, XPATH_BASE_GACHABASE_META_DATA)
-
-    elements_charbase_data = element_parent.find_elements(By.TAG_NAME, "div")
-    char["name"] = elements_charbase_data[0].find_element(By.TAG_NAME, "h1").text
-    camp_raw = elements_charbase_data[0].find_element(By.TAG_NAME, "h2").text
-    char["camp"] = CAMP_ID[_get_first_word(camp_raw)]
-
-    char_metadata = elements_charbase_data[1].find_elements(By.TAG_NAME, "a")
-    char["rarity"] = RARITY_ID[char_metadata[0].text]
-    char["weaponType"] = WEAPON_TYPE_ID[char_metadata[2].text]
-    char["ElementType"] = ELEMENT_TYPE_ID[char_metadata[3].text]
-    char["hitType"] = [HIT_TYPE_ID[char_metadata[4].text]]
-    if len(char_metadata) > 5:
-        char["hitType"].append(HIT_TYPE_ID[char_metadata[5].text])
-
-    char["id"] = _find_id(char_metadata[-1].text)
-    return char
-    """return {
-        "skillKit": {},
-        "hitMap": {},
-        "staticStats": {},
-        "growthStat": {},
-        "coreGrowthStat": {},
-    }"""
-
-
-def _get_first_word(text):
-    pattern = r"^(\S*)"
-    match = re.search(pattern, text)
-    if match:
-        return match.group(1)
-
-    return "None"
-
-
-def _find_id(text):
-    pattern = rf"(\d{4})"
-    match = re.search(pattern, text)
-    if match:
-        return match.group(1)
-
-    return ""
-
-
-def _get_char_skillkit(char_url):
-    load_character_page(char_url)
-    close_dialog()
-
-    global hit_map_aux
-    skillkit = {}
-    hit_map_aux = {}
-
-    for skill_id in range(5):
-        logging.info(GAMEGACHA_SKILLS_SECTION_MAP[skill_id])
-        skillkit[GAMEGACHA_SKILL_MAP[skill_id]] = _get_skill_data(skill_id)
+    char = get_metadata(browser)
+    char = get_char_skillkit(char, browser)
+    char = _get_core(char)
 
     browser.quit()
-    return {"skillKit": skillkit, "hitMap": hit_map_aux}
+
+    return char
+
+
+def _get_core(char):
+    core_element = browser.find_element(By.XPATH, XPATH_CORE)
+    core_elements_desc = core_element.find_elements(By.XPATH, "./div[1]")
+    desc = []
+
+    for element_desc in core_elements_desc:
+        element_html = element_desc.get_attribute("outerHTML")
+        desc.append(str(BeautifulSoup(element_html, "html.parser")))
+
+    core_elements_stats = core_element.find_elements(By.XPATH, "./div[2]/div")
+    core_growth_stats = {}
+    for stats in core_elements_stats:
+        texts_core = stats.find_elements(By.TAG_NAME, "span")
+        core_growth_stats[STATS_BASE_ID[texts_core[0].text]] = float(
+            texts_core[1].text.rstrip("%")
+        )
+
+    for index, _ in core_growth_stats.items():
+        core_growth_stats[index] /= 3
+        if index in STATS_FLOAT_ROUND:
+            core_growth_stats[index] *= 10000
+
+    char["coreSkill"] = {"desc": desc, "coreGrowthStat": core_growth_stats}
+    return char
 
 
 def load_character_page(char_url):
@@ -121,149 +89,9 @@ def close_dialog():
     action.click(close_button).perform()
 
 
-def _get_skill_data(skill_id: int):
-    element_skills = browser.find_element(By.XPATH, get_skill_xpath(skill_id + 1))
-    elements_desc = element_skills.find_element(By.XPATH, XPATH_SKILL_DESCS)
-
-    desc = []
-
-    logging.info(f"pegando descrição da skill...")
-    for element_desc in elements_desc.find_elements(By.CLASS_NAME, "text-sm "):
-        element_html = element_desc.get_attribute("outerHTML")
-        desc.append(str(BeautifulSoup(element_html, "html.parser")))
-
-    return {
-        "skillId": GAMEGACHA_SKILL_MAP[skill_id],
-        "desc": desc,
-        "subSkills": _get_sub_skills_data(skill_id, element_skills),
-    }
-
-
-def _get_sub_skills_data(skill_id: int, element_skills):
-    sub_skills_data = element_skills.find_elements(By.XPATH, XPATH_SUB_SKILLS_DATA)
-    sub_skills = {}
-
-    logging.info(f"iniciando manipulação do slider de lvl...")
-    slider_knob = sub_skills_data[0].find_element(By.XPATH, XPATH_SLIDER_KNOB)
-    action = ActionChains(browser)
-    reset_slider(action, slider_knob)
-
-    for _ in range(1, 17):
-        _get_sub_skills_per_lvl(sub_skills_data, sub_skills)
-        next_lvl(action, slider_knob)
-
-    return sub_skills
-
-
-def _get_sub_skills_per_lvl(sub_skills_data, sub_skills):
-    for index, sub_skill_data in enumerate(sub_skills_data):
-        if index & 1 == 0:
-            sub_skill_id_raw = sub_skill_data.find_element(By.XPATH, "./h3").text
-            sub_skill_id = re.sub(r":?\sSTATS$", "", sub_skill_id_raw)
-
-            logging.info(f"pegando {sub_skill_id}...")
-        else:
-            if sub_skill_id not in sub_skills:
-                sub_skills[sub_skill_id] = {}
-
-            _get_complex_hits_data(
-                sub_skill_data, sub_skill_id, sub_skills[sub_skill_id]
-            )
-
-
-def reset_slider(action, knob):
-    try:
-        knob.click()
-    except Exception as e:
-        logging.warn(e)
-
-    for _ in range(16):
-        action.send_keys(Keys.ARROW_LEFT)
-
-    action.perform()
-    logging.info(f"Slider resetado posição - {knob.get_attribute("aria-valuenow")}")
-
-
-def next_lvl(action, knob):
-    try:
-        knob.click()
-    except Exception as e:
-        logging.warn(e)
-
-    action.send_keys(Keys.ARROW_RIGHT).perform()
-    slider_index = knob.get_attribute("aria-valuenow")
-    logging.info(f"skill lvl - {slider_index}")
-
-
-def _get_complex_hits_data(sub_skill_data, sub_skill_id, sub_skill):
-    logging.info(f"construindo subSkill {sub_skill_id}...")
-    tbodys_element = sub_skill_data.find_elements(By.TAG_NAME, "tbody")
-    tr_elements = tbodys_element[0].find_elements(By.TAG_NAME, "tr")
-
-    for tr in tr_elements:
-        complex_hit_id = ""
-        html_tr = tr.get_attribute("outerHTML")
-        tds_soup = BeautifulSoup(html_tr, "html.parser").find_all("td")
-        spans_name_soup = tds_soup[0].find_all("span")
-
-        if len(spans_name_soup) < 2:
-            continue
-
-        raw_name = find_hit_complex_id(spans_name_soup[0].get_text(strip=True))  # type: ignore
-        raw_ids = spans_name_soup[1].get_text(strip=True).split(", ")
-        multiplier = tds_soup[1].contents[2].span.get_text(strip=True)  # type: ignore
-
-        if not raw_name[1]:
-            continue
-
-        if not raw_name[0]:
-            complex_hit_id = sub_skill_id
-        else:
-            complex_hit_id = raw_name[0] + raw_name[2]
-
-        if complex_hit_id in sub_skill:
-            sub_skill[complex_hit_id][raw_name[1].lower()].append(multiplier)
-
-        else:
-            sub_skill[complex_hit_id] = {"hitID": raw_ids, "dmg": [], "daze": []}
-            sub_skill[complex_hit_id][raw_name[1].lower()].append(multiplier)
-
-    if len(tbodys_element) == 2:
-        _update_hit_map(tbodys_element[1])
-
-
-def find_hit_complex_id(raw: str) -> tuple:
-    pattern = r"^(.*?)\s*(DMG|Daze)\sMultiplier(.*)$"
-    match = re.search(pattern, raw)
-    if match:
-        return match.groups()
-
-    return ("", "", "")
-
-
-def _update_hit_map(tbody_element):
-    tr_elements = tbody_element.find_elements(By.TAG_NAME, "tr")
-    for tr in tr_elements:
-        html_tr = tr.get_attribute("outerHTML")
-        th_soup = BeautifulSoup(html_tr, "html.parser").find("th")
-        tds_soup = BeautifulSoup(html_tr, "html.parser").find_all("td")
-        simple_hit_id = th_soup.get_text(strip=True)  # type: ignore
-
-        if simple_hit_id in hit_map_aux:
-            hit_map_aux[simple_hit_id]["dmg"].append(tds_soup[0].get_text(strip=True))
-            hit_map_aux[simple_hit_id]["daze"].append(tds_soup[1].get_text(strip=True))
-        else:
-            hit_map_aux[simple_hit_id] = {
-                "anomalyBuildup": tds_soup[3].get_text(strip=True),
-                "miasmaDepletion": tds_soup[5].get_text(strip=True),
-                "dmg": [tds_soup[0].get_text(strip=True)],
-                "daze": [tds_soup[1].get_text(strip=True)],
-            }
-
-
 def write_char(index):
     try:
-        char = _get_char_skillkit(GACHABASE_URL_CHARS[index])
+        char = _get_char(GACHABASE_URL_CHARS[index])
         folder_path = "/app/output"
         file_name = f"{CHAR_ID_LIST[index]}.json"
         complete_path = os.path.join(folder_path, file_name)

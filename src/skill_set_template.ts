@@ -8,21 +8,26 @@ export interface char {
     hitMap: HitMap
     staticStats: StaticStats
     growthStat: GrowthStat
-    coreGrowthStat: CoreGrowthStat
+    coreSkill: CoreSkill
 }
 
 export type StaticStats = {
     [id: string]: string
 }
 
-export type Stats = {
-    [id: string]: string
+export type GrowthStat = {
+    [id: string]: BaseGrowthStat
 }
 
-export type GrowthStat = {
+export type BaseGrowthStat = {
     base: number,
     growth: number,
     asc: number
+}
+
+export type CoreSkill = {
+    desc: string,
+    coreGrowthStat: CoreGrowthStat
 }
 
 export type CoreGrowthStat = {
