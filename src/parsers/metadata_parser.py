@@ -3,7 +3,7 @@ import re
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
-from char_statsbase_parser import get_statsbase
+from parsers.char_statsbase_parser import get_statsbase
 from constants import *
 from xpath_constants import XPATH_GACHABASE_META_DATA
 
@@ -15,7 +15,7 @@ def get_metadata(browser: WebElement):
     elements_charbase_data = element_parent.find_elements(By.XPATH, "./div")
     char["name"] = elements_charbase_data[0].find_element(By.TAG_NAME, "h1").text
 
-    logging.info(f"pegando metadata de {char["name"]}...")
+    logging.info("pegando metadata de %s...", char["name"])
     camp_raw = elements_charbase_data[0].find_element(By.TAG_NAME, "h2").text
     char["camp"] = CAMP_ID[_get_first_word(camp_raw)]
 

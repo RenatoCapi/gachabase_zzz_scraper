@@ -41,8 +41,8 @@ export type HitMap = {
 export type SimpleHit = {
     anomalyBuildup: number,
     miasmaDepletion: number,
-    dmg: number[],
-    daze: number[],
+    dmg: Multiplier,
+    daze: Multiplier,
 }
 
 export type SkillKit = {
@@ -50,7 +50,7 @@ export type SkillKit = {
 }
 
 export type Skill = {
-    skillId: number, //basic, dodge
+    skillId: string, //basic, dodge
     Desc: string,
     subSkills: SubSkill
 }
@@ -66,8 +66,13 @@ export type ComplexHitData = {
     formula: string, // agrupar danos que usam multiplos simpleHits
     // anby ex = [1521008]*3 + [1521009]
     hitID: string[]
-    dmg: string[], // resultado da conta dos simple hits
-    daze: string[],
+    dmg: Multiplier, // resultado da conta dos simple hits
+    daze: Multiplier,
+}
+
+export type Multiplier = {
+    base: string,
+    growth: string
 }
 
 /*

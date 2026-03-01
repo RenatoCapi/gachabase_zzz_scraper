@@ -11,9 +11,10 @@ from selenium.webdriver.common.action_chains import ActionChains
 from bs4 import BeautifulSoup
 import requests
 
-from metadata_parser import get_metadata
+from parsers.skillkit_parser import get_char_skillkit
+from parsers.metadata_parser import get_metadata
 from constants import *
-from skillkit_parser import get_char_skillkit
+from util import float_to_int, text_to_float, text_to_int
 from xpath_constants import *
 
 logging.basicConfig(
@@ -59,14 +60,16 @@ def _get_core(char):
     core_growth_stats = {}
     for stats in core_elements_stats:
         texts_core = stats.find_elements(By.TAG_NAME, "span")
-        core_growth_stats[STATS_BASE_ID[texts_core[0].text]] = float(
-            texts_core[1].text.rstrip("%")
+        core_growth_stats[STATS_BASE_ID[texts_core[0].text]] = text_to_float(
+            texts_core[1].text
         )
 
     for index, _ in core_growth_stats.items():
         core_growth_stats[index] /= 3
         if index in STATS_FLOAT_ROUND:
-            core_growth_stats[index] *= 10000
+            core_growth_stats[index] = float_to_int(core_growth_stats[index])
+        else:
+            core_growth_stats[index] = int(core_growth_stats[index])
 
     char["coreSkill"] = {"desc": desc, "coreGrowthStat": core_growth_stats}
     return char
@@ -75,7 +78,7 @@ def _get_core(char):
 def load_character_page(char_url):
     try:
         start_session()
-        logging.info(f"acessando a url: '{URL_BASE_GACHABASE + char_url}'")
+        logging.info("acessando a url: %s", URL_BASE_GACHABASE + char_url)
         browser.get(URL_BASE_GACHABASE + char_url)
     except Exception as e:
         print(f"personagem - url: {char_url}")
@@ -96,19 +99,19 @@ def write_char(index):
         file_name = f"{CHAR_ID_LIST[index]}.json"
         complete_path = os.path.join(folder_path, file_name)
 
-        logging.info(f"escrevendo no caminho {complete_path}")
+        logging.info("escrevendo no caminho %s", complete_path)
 
-        with open(complete_path, "w") as file:
+        with open(complete_path, "w", encoding="utf-8") as file:
             file.write(json.dumps(char))
 
     except Exception as e:
-        print(f"personagem - id: {CHAR_ID_LIST[index]}")
-        print(f"An exception occurred: {e}")
+        logging.error("personagem - id: %s", CHAR_ID_LIST[index])
+        logging.error("An exception occurred: %s", e)
         traceback.print_exc()
 
 
 def write_all_chars_skills():
-    for index in range(13, len(GACHABASE_URL_CHARS)):
+    for index in range(len(GACHABASE_URL_CHARS)):
         write_char(index)
 
     browser.quit()

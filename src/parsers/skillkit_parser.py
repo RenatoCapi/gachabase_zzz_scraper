@@ -7,6 +7,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from bs4 import BeautifulSoup
 
+from util import float_to_int, text_to_int
 from xpath_constants import *
 
 
@@ -33,7 +34,7 @@ def _get_skill_data(skill_id: int):
 
     desc = []
 
-    logging.info(f"pegando descrição da skill...")
+    logging.info("pegando descrição da skill...")
     for element_desc in elements_desc.find_elements(By.CLASS_NAME, "text-sm "):
         element_html = element_desc.get_attribute("outerHTML")
         desc.append(str(BeautifulSoup(element_html, "html.parser")))
@@ -41,22 +42,23 @@ def _get_skill_data(skill_id: int):
     return {
         "skillId": GAMEGACHA_SKILL_MAP[skill_id],
         "desc": desc,
-        "subSkills": _get_sub_skills_data(skill_id, element_skills),
+        "subSkills": _get_sub_skills_data(element_skills),
     }
 
 
-def _get_sub_skills_data(skill_id: int, element_skills):
+def _get_sub_skills_data(element_skills):
     sub_skills_data = element_skills.find_elements(By.XPATH, XPATH_SUB_SKILLS_DATA)
     sub_skills = {}
 
-    logging.info(f"iniciando manipulação do slider de lvl...")
-    slider_knob = sub_skills_data[0].find_element(By.XPATH, XPATH_SLIDER_KNOB)
+    logging.info("iniciando manipulação do slider de lvl...")
+    slider = sub_skills_data[0].find_element(By.XPATH, XPATH_SLIDER_KNOB)
     action = ActionChains(browser)
-    reset_slider(action, slider_knob)
 
-    for _ in range(1, 17):
-        _get_sub_skills_per_lvl(sub_skills_data, sub_skills)
-        next_lvl(action, slider_knob)
+    _slider_move(action, slider, Keys.ARROW_LEFT)
+    _get_sub_skills_per_lvl(sub_skills_data, sub_skills)
+
+    _slider_move(action, slider, Keys.ARROW_RIGHT)
+    _get_sub_skills_per_lvl(sub_skills_data, sub_skills)
 
     return sub_skills
 
@@ -67,7 +69,7 @@ def _get_sub_skills_per_lvl(sub_skills_data, sub_skills):
             sub_skill_id_raw = sub_skill_data.find_element(By.XPATH, "./h3").text
             sub_skill_id = re.sub(r":?\sSTATS$", "", sub_skill_id_raw)
 
-            logging.info(f"pegando {sub_skill_id}...")
+            logging.info("pegando %s...", sub_skill_id)
         else:
             if sub_skill_id not in sub_skills:
                 sub_skills[sub_skill_id] = {}
@@ -77,32 +79,22 @@ def _get_sub_skills_per_lvl(sub_skills_data, sub_skills):
             )
 
 
-def reset_slider(action, knob):
+def _slider_move(action, slider, arrow):
     try:
-        knob.click()
+        slider.click()
     except Exception as e:
         logging.warning(e)
 
-    for _ in range(16):
-        action.send_keys(Keys.ARROW_LEFT)
+    for _ in range(15):
+        action.send_keys(arrow)
 
     action.perform()
-    logging.info(f"Slider resetado posição - {knob.get_attribute("aria-valuenow")}")
-
-
-def next_lvl(action, knob):
-    try:
-        knob.click()
-    except Exception as e:
-        logging.warn(e)
-
-    action.send_keys(Keys.ARROW_RIGHT).perform()
-    slider_index = knob.get_attribute("aria-valuenow")
-    logging.info(f"skill lvl - {slider_index}")
+    slider_index = slider.get_attribute("aria-valuenow")
+    logging.info("Skill lvl - %s", slider_index)
 
 
 def _get_complex_hits_data(sub_skill_data, sub_skill_id, sub_skill):
-    logging.info(f"construindo subSkill {sub_skill_id}...")
+    logging.info("construindo subSkill %s...", sub_skill_id)
     tbodys_element = sub_skill_data.find_elements(By.TAG_NAME, "tbody")
     tr_elements = tbodys_element[0].find_elements(By.TAG_NAME, "tr")
 
@@ -117,22 +109,31 @@ def _get_complex_hits_data(sub_skill_data, sub_skill_id, sub_skill):
 
         raw_name = find_hit_complex_id(spans_name_soup[0].get_text(strip=True))  # type: ignore
         raw_ids = spans_name_soup[1].get_text(strip=True).split(", ")
-        multiplier = tds_soup[1].contents[2].span.get_text(strip=True)  # type: ignore
+        multiplier = float(tds_soup[1].contents[2].span.get_text(strip=True).rstrip("%"))  # type: ignore
 
         if not raw_name[1]:
             continue
 
+        hit_type = raw_name[1].lower()
+
         if not raw_name[0]:
-            complex_hit_id = sub_skill_id
+            complex_hit_id = sub_skill_id + raw_name[2]
         else:
             complex_hit_id = raw_name[0] + raw_name[2]
 
         if complex_hit_id in sub_skill:
-            sub_skill[complex_hit_id][raw_name[1].lower()].append(multiplier)
+            sub_skill[complex_hit_id][hit_type].append(multiplier)
 
         else:
             sub_skill[complex_hit_id] = {"hitID": raw_ids, "dmg": [], "daze": []}
-            sub_skill[complex_hit_id][raw_name[1].lower()].append(multiplier)
+            sub_skill[complex_hit_id][hit_type].append(multiplier)
+
+        # converte multiplier em {base, growth}
+        if len(sub_skill[complex_hit_id][hit_type]) == 2:
+            sub_skill[complex_hit_id][hit_type] = get_multiplier(
+                sub_skill[complex_hit_id][hit_type][1],
+                sub_skill[complex_hit_id][hit_type][0],
+            )
 
     if len(tbodys_element) == 2:
         _update_hit_map(tbodys_element[1])
@@ -155,13 +156,33 @@ def _update_hit_map(tbody_element):
         tds_soup = BeautifulSoup(html_tr, "html.parser").find_all("td")
         simple_hit_id = th_soup.get_text(strip=True)  # type: ignore
 
+        dmg = float(tds_soup[0].get_text(strip=True).rstrip("%"))
+        daze = float(tds_soup[1].get_text(strip=True).rstrip("%"))
+        anomaly_buildup = text_to_int(tds_soup[3].get_text(strip=True))
+        miasma_depletion = text_to_int(tds_soup[5].get_text(strip=True))
+
         if simple_hit_id in hit_map_aux:
-            hit_map_aux[simple_hit_id]["dmg"].append(tds_soup[0].get_text(strip=True))
-            hit_map_aux[simple_hit_id]["daze"].append(tds_soup[1].get_text(strip=True))
+            hit_map_aux[simple_hit_id]["dmg"].append(dmg)
+            hit_map_aux[simple_hit_id]["daze"].append(daze)
         else:
             hit_map_aux[simple_hit_id] = {
-                "anomalyBuildup": tds_soup[3].get_text(strip=True),
-                "miasmaDepletion": tds_soup[5].get_text(strip=True),
-                "dmg": [tds_soup[0].get_text(strip=True)],
-                "daze": [tds_soup[1].get_text(strip=True)],
+                "anomalyBuildup": anomaly_buildup,
+                "miasmaDepletion": miasma_depletion,
+                "dmg": [dmg],
+                "daze": [daze],
             }
+
+        if len(hit_map_aux[simple_hit_id]["daze"]) == 2:
+            hit_map_aux[simple_hit_id]["dmg"] = get_multiplier(
+                hit_map_aux[simple_hit_id]["dmg"][1],
+                hit_map_aux[simple_hit_id]["dmg"][0],
+            )
+            hit_map_aux[simple_hit_id]["daze"] = get_multiplier(
+                hit_map_aux[simple_hit_id]["daze"][1],
+                hit_map_aux[simple_hit_id]["daze"][0],
+            )
+
+
+def get_multiplier(final: float, base: float):
+    growth = float_to_int((final - base) / 15)
+    return {"base": float_to_int(base), "growth": growth}
