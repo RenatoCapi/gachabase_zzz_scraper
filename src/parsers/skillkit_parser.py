@@ -20,7 +20,10 @@ def get_char_skillkit(char, browser_instance):
     hit_map_aux = {}
 
     for skill_id in range(5):
-        logging.info(GAMEGACHA_SKILLS_SECTION_MAP[skill_id])
+        logging.info(
+            "------------------- %s -------------------",
+            GAMEGACHA_SKILLS_SECTION_MAP[skill_id],
+        )
         skillkit[GAMEGACHA_SKILL_MAP[skill_id]] = _get_skill_data(skill_id)
 
     char["skillKit"] = skillkit
@@ -109,7 +112,7 @@ def _get_complex_hits_data(sub_skill_data, sub_skill_id, sub_skill):
 
         raw_name = find_hit_complex_id(spans_name_soup[0].get_text(strip=True))  # type: ignore
         raw_ids = spans_name_soup[1].get_text(strip=True).split(", ")
-        multiplier = float(tds_soup[1].contents[2].span.get_text(strip=True).rstrip("%"))  # type: ignore
+        formula_result = tds_soup[1].contents[2].span.get_text(strip=True)  # type: ignore
 
         if not raw_name[1]:
             continue
@@ -122,18 +125,11 @@ def _get_complex_hits_data(sub_skill_data, sub_skill_id, sub_skill):
             complex_hit_id = raw_name[0] + raw_name[2]
 
         if complex_hit_id in sub_skill:
-            sub_skill[complex_hit_id][hit_type].append(multiplier)
+            sub_skill[complex_hit_id][hit_type].append(formula_result)
 
         else:
             sub_skill[complex_hit_id] = {"hitID": raw_ids, "dmg": [], "daze": []}
-            sub_skill[complex_hit_id][hit_type].append(multiplier)
-
-        # converte multiplier em {base, growth}
-        if len(sub_skill[complex_hit_id][hit_type]) == 2:
-            sub_skill[complex_hit_id][hit_type] = get_multiplier(
-                sub_skill[complex_hit_id][hit_type][1],
-                sub_skill[complex_hit_id][hit_type][0],
-            )
+            sub_skill[complex_hit_id][hit_type].append(formula_result)
 
     if len(tbodys_element) == 2:
         _update_hit_map(tbodys_element[1])
@@ -159,9 +155,12 @@ def _update_hit_map(tbody_element):
         dmg = float(tds_soup[0].get_text(strip=True).rstrip("%"))
         daze = float(tds_soup[1].get_text(strip=True).rstrip("%"))
         anomaly_buildup = text_to_int(tds_soup[3].get_text(strip=True))
-        miasma_depletion = text_to_int(tds_soup[5].get_text(strip=True))
+        miasma_depletion = text_to_int(tds_soup[-1].get_text(strip=True))
 
         if simple_hit_id in hit_map_aux:
+            if isinstance(hit_map_aux[simple_hit_id]["daze"], dict):
+                continue
+
             hit_map_aux[simple_hit_id]["dmg"].append(dmg)
             hit_map_aux[simple_hit_id]["daze"].append(daze)
         else:

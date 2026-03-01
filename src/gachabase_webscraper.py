@@ -14,12 +14,12 @@ import requests
 from parsers.skillkit_parser import get_char_skillkit
 from parsers.metadata_parser import get_metadata
 from constants import *
-from util import float_to_int, text_to_float, text_to_int
+from util import float_to_int, text_to_float
 from xpath_constants import *
 
 logging.basicConfig(
     stream=sys.stdout,
-    level=logging.INFO,
+    level=logging.WARNING,
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
@@ -78,18 +78,20 @@ def _get_core(char):
 def load_character_page(char_url):
     try:
         start_session()
-        logging.info("acessando a url: %s", URL_BASE_GACHABASE + char_url)
+        logging.warning("acessando a url: %s", URL_BASE_GACHABASE + char_url)
         browser.get(URL_BASE_GACHABASE + char_url)
     except Exception as e:
-        print(f"personagem - url: {char_url}")
-        print(f"Não foi possível carregar a página, erro: {e}")
+        logging.error("personagem - url: %s", URL_BASE_GACHABASE + char_url)
         traceback.print_exc()
 
 
 def close_dialog():
-    close_button = browser.find_element(By.XPATH, XPATH_CLOSE_BUTTON)
-    action = ActionChains(browser)
-    action.click(close_button).perform()
+    try:
+        close_button = browser.find_element(By.XPATH, XPATH_CLOSE_BUTTON)
+        action = ActionChains(browser)
+        action.click(close_button).perform()
+    except Exception:
+        traceback.print_exc()
 
 
 def write_char(index):
@@ -99,22 +101,19 @@ def write_char(index):
         file_name = f"{CHAR_ID_LIST[index]}.json"
         complete_path = os.path.join(folder_path, file_name)
 
-        logging.info("escrevendo no caminho %s", complete_path)
+        logging.warning("escrevendo no caminho %s", complete_path)
 
         with open(complete_path, "w", encoding="utf-8") as file:
             file.write(json.dumps(char))
 
-    except Exception as e:
+    except Exception:
         logging.error("personagem - id: %s", CHAR_ID_LIST[index])
-        logging.error("An exception occurred: %s", e)
         traceback.print_exc()
 
 
-def write_all_chars_skills():
-    for index in range(len(GACHABASE_URL_CHARS)):
+def write_all_chars():
+    for index in range(21, len(GACHABASE_URL_CHARS)):
         write_char(index)
-
-    browser.quit()
 
 
 # usado uma vez pra pegar o mapa de urls

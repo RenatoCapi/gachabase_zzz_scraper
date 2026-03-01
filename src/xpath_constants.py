@@ -5,7 +5,6 @@ GAMEGACHA_SKILLS_SECTION_MAP = ["BASIC", "DODGE", "ASSIST", "SPECIAL", "CHAIN"]
 
 XPATH_CLOSE_BUTTON = "/html/body/div[9]/div/div/button"
 
-
 XPATH_BASE_GACHABASE_SKILLS = "/html/body/div[1]/div[1]/main/article/section[2]"
 
 
