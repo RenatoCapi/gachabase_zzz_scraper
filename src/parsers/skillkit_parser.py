@@ -1,7 +1,6 @@
 import logging
 import re
 
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
@@ -144,7 +143,7 @@ def find_hit_complex_id(raw: str) -> tuple:
     return ("", "", "")
 
 
-def _update_hit_map(tbody_element):
+def _update_hit_map(tbody_element) -> None:
     tr_elements = tbody_element.find_elements(By.TAG_NAME, "tr")
     for tr in tr_elements:
         html_tr = tr.get_attribute("outerHTML")
@@ -157,31 +156,47 @@ def _update_hit_map(tbody_element):
         anomaly_buildup = text_to_int(tds_soup[3].get_text(strip=True))
         miasma_depletion = text_to_int(tds_soup[-1].get_text(strip=True))
 
-        if simple_hit_id in hit_map_aux:
-            if isinstance(hit_map_aux[simple_hit_id]["daze"], dict):
-                continue
-
-            hit_map_aux[simple_hit_id]["dmg"].append(dmg)
-            hit_map_aux[simple_hit_id]["daze"].append(daze)
-        else:
-            hit_map_aux[simple_hit_id] = {
-                "anomalyBuildup": anomaly_buildup,
-                "miasmaDepletion": miasma_depletion,
-                "dmg": [dmg],
-                "daze": [daze],
-            }
-
-        if len(hit_map_aux[simple_hit_id]["daze"]) == 2:
-            hit_map_aux[simple_hit_id]["dmg"] = get_multiplier(
-                hit_map_aux[simple_hit_id]["dmg"][1],
-                hit_map_aux[simple_hit_id]["dmg"][0],
-            )
-            hit_map_aux[simple_hit_id]["daze"] = get_multiplier(
-                hit_map_aux[simple_hit_id]["daze"][1],
-                hit_map_aux[simple_hit_id]["daze"][0],
-            )
+        resolve_mult(simple_hit_id, dmg, daze, anomaly_buildup, miasma_depletion)
 
 
-def get_multiplier(final: float, base: float):
+def resolve_mult(simple_hit_id, dmg, daze, anomaly_buildup, miasma_depletion) -> None:
+    if not simple_hit_id in hit_map_aux:
+        hit_map_aux[simple_hit_id] = {
+            "anomalyBuildup": anomaly_buildup,
+            "miasmaDepletion": miasma_depletion,
+            "dmg": [dmg],
+            "daze": [daze],
+        }
+        return
+
+    if isinstance(hit_map_aux[simple_hit_id]["daze"], dict):
+        return
+
+    if (
+        hit_map_aux[simple_hit_id]["dmg"][0] != 0
+        and hit_map_aux[simple_hit_id]["dmg"][0] == dmg
+    ):
+        return
+
+    if (
+        hit_map_aux[simple_hit_id]["daze"][0] != 0
+        and hit_map_aux[simple_hit_id]["daze"][0] == daze
+    ):
+        return
+
+    hit_map_aux[simple_hit_id]["dmg"].append(dmg)
+    hit_map_aux[simple_hit_id]["daze"].append(daze)
+
+    hit_map_aux[simple_hit_id]["dmg"] = get_dict_multiplier(
+        hit_map_aux[simple_hit_id]["dmg"][1],
+        hit_map_aux[simple_hit_id]["dmg"][0],
+    )
+    hit_map_aux[simple_hit_id]["daze"] = get_dict_multiplier(
+        hit_map_aux[simple_hit_id]["daze"][1],
+        hit_map_aux[simple_hit_id]["daze"][0],
+    )
+
+
+def get_dict_multiplier(final: float, base: float):
     growth = float_to_int((final - base) / 15)
     return {"base": float_to_int(base), "growth": growth}
