@@ -51,7 +51,7 @@ CHAR_ID_LIST = [
 ]
 
 GACHABASE_URL_CHARS = [
-    "/agents/1501/aria3?lang=en&branch=release",
+    "/agents/1501/aria?lang=en&branch=release",
     "/agents/1491/sunna?lang=en&branch=release",
     "/agents/1431/ye-shunguang?lang=en&branch=release",
     "/agents/1341/zhao?lang=en&branch=release",

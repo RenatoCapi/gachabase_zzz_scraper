@@ -112,7 +112,7 @@ def write_char(index):
 
 
 def write_all_chars():
-    for index in range(21, len(GACHABASE_URL_CHARS)):
+    for index in range(len(GACHABASE_URL_CHARS)):
         write_char(index)
 
 

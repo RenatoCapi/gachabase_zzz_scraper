@@ -7,7 +7,7 @@ import traceback
 from util import text_to_int
 
 logging.basicConfig(
-    filename="/mnt/g/projetos/Projects/Gamegacha_scraper/output/app.log",
+    filename="/mnt/g/projetos/Projects/Gamegacha_scraper/output/tests/app.log",
     encoding="utf-8",
     filemode="a",  # 'a' means append
     level=logging.INFO,
@@ -15,6 +15,8 @@ logging.basicConfig(
 )
 
 # ("daze":) \[\n[\S\s]*?\]
+# this chars need manual fix
+# soukaku, lycaon, ellen, piper, zhuyuan, ye shunguang
 
 
 def fix_all_chars_formulas():
@@ -57,11 +59,6 @@ def data_permutation(data):
 
 
 def fix_formula(complex_hit_id: str, complex_hit: dict, hit_map):
-    # casos
-    # 1 id e a conversão de lvl 1 bate
-    # 1 id mas os números não batem
-    # mais de 1 id
-
     if isinstance(complex_hit["dmg"], dict) and isinstance(complex_hit["daze"], dict):
         return
 
@@ -86,7 +83,7 @@ def compare_hit_map_data(complex_hit, simple_hit, mult_id):
     mult_aux = str_multiplier(complex_hit[mult_id][0], complex_hit[mult_id][1])
 
     if mult_aux["base"] == -1:
-        complex_hit[mult_id] = simple_hit
+        complex_hit[mult_id] = simple_hit[mult_id]
         complex_hit["formula"] = "{" + complex_hit["hitID"][0] + "}"
         return
 
@@ -99,24 +96,30 @@ def compare_hit_map_data(complex_hit, simple_hit, mult_id):
         return
 
     greater_div, greater_mod = divmod(
-        (mult_aux["base"] + mult_aux["growth"] * 16),
-        (simple_hit[mult_id]["base"] + simple_hit[mult_id]["growth"] * 16),
+        (mult_aux["base"] + mult_aux["growth"] * 15),
+        (simple_hit[mult_id]["base"] + simple_hit[mult_id]["growth"] * 15),
     )
 
     if greater_mod == 0:
-        complex_hit[mult_id] = simple_hit
+        complex_hit[mult_id] = {"base": 0, "growth": 0}
+        complex_hit[mult_id]["base"] = int(simple_hit[mult_id]["base"] * greater_div)
+        complex_hit[mult_id]["growth"] = int(
+            simple_hit[mult_id]["growth"] * greater_div
+        )
         complex_hit["formula"] = (
             "{" + complex_hit["hitID"][0] + "}" + "*" + str(greater_div)
         )
         return
 
     less_div, less_mod = divmod(
-        (simple_hit[mult_id]["base"] + simple_hit[mult_id]["growth"] * 16),
-        (mult_aux["base"] + mult_aux["growth"] * 16),
+        (simple_hit[mult_id]["base"] + simple_hit[mult_id]["growth"] * 15),
+        (mult_aux["base"] + mult_aux["growth"] * 15),
     )
 
     if less_mod == 0:
-        complex_hit[mult_id] = simple_hit
+        complex_hit[mult_id] = {"base": 0, "growth": 0}
+        complex_hit[mult_id]["base"] = int(simple_hit[mult_id]["base"] / less_div)
+        complex_hit[mult_id]["growth"] = int(simple_hit[mult_id]["growth"] / less_div)
         complex_hit["formula"] = (
             "{" + complex_hit["hitID"][0] + "}" + "/" + str(less_div)
         )
@@ -140,16 +143,23 @@ def compare_calc_mult_sum(complex_hit, hit_map):
 
     formula = formula[:-1]
 
-    print(complex_hit)
-    complex_calc_dmg = str_multiplier(complex_hit["dmg"][0], complex_hit["dmg"][1])
+    complex_calc_test = {"base": 0, "growth": 0}
+    if len(complex_hit["dmg"]) == 2:
+        complex_calc_test = str_multiplier(complex_hit["dmg"][0], complex_hit["dmg"][1])
 
     if (
-        complex_calc_dmg["base"] == hit_dmg_aux["base"]
-        or complex_calc_dmg["base"] == -1
+        complex_calc_test["base"] == hit_dmg_aux["base"]
+        or complex_calc_test["base"] == -1
     ):
+        if complex_calc_test["base"] == -1:
+            logging.warning("hit_dmg_aux - %s", str(hit_dmg_aux))
+            logging.warning("hit_daze_aux - %s", str(hit_daze_aux))
+            logging.warning("complex hit - %s", str(complex_hit))
+
         complex_hit["dmg"] = hit_dmg_aux
         complex_hit["daze"] = hit_daze_aux
         complex_hit["formula"] = formula
+
     else:
         logging.warning("não é uma somátoria!!!")
 
