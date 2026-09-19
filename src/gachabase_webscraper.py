@@ -3,23 +3,27 @@ import logging
 import os
 import re
 import sys
+import time
 import traceback
+from warnings import catch_warnings
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import requests
 
-from parsers.skillkit_parser import get_char_skillkit
-from parsers.metadata_parser import get_metadata
+from skillkit_parser import get_char_skillkit
+from metadata_parser import get_metadata
 from constants import *
 from util import float_to_int, text_to_float
 from xpath_constants import *
 
 logging.basicConfig(
     stream=sys.stdout,
-    level=logging.WARNING,
+    level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
@@ -36,7 +40,8 @@ def start_session():
 
 def _get_char(char_url):
     load_character_page(char_url)
-    close_dialog()
+    close_dialog("dialog:s21:close")
+    close_dialog("dialog:s20:close")
 
     char = get_metadata(browser)
     char = get_char_skillkit(char, browser)
@@ -80,25 +85,35 @@ def load_character_page(char_url):
         start_session()
         logging.warning("acessando a url: %s", URL_BASE_GACHABASE + char_url)
         browser.get(URL_BASE_GACHABASE + char_url)
-    except Exception as e:
+    except Exception:
         logging.error("personagem - url: %s", URL_BASE_GACHABASE + char_url)
         traceback.print_exc()
 
 
-def close_dialog():
+def close_dialog(xpath_button):
     try:
-        close_button = browser.find_element(By.XPATH, XPATH_CLOSE_BUTTON)
-        action = ActionChains(browser)
-        action.click(close_button).perform()
+        logging.info("tentando fechar o botão " + xpath_button)
+        close_button = WebDriverWait(browser, 5).until(
+            EC.element_to_be_clickable((By.ID, xpath_button))
+        )
+
+        close_button.click()
+        # close_button = browser.find_element(By.XPATH, xpath_button)
+        # action = ActionChains(browser)
+        # action.click(close_button).perform()
     except Exception:
         traceback.print_exc()
 
 
 def write_char(index):
+    pattern_char_id = r"/agents/(\d{4})/"
+    match_char_id = re.search(pattern_char_id, GACHABASE_URL_CHARS_3_1_0[index])
+    char_id = match_char_id.group(1)  # type: ignore
     try:
-        char = _get_char(GACHABASE_URL_CHARS[index])
+        char = _get_char(GACHABASE_URL_CHARS_3_1_0[index])
         folder_path = "/app/output"
-        file_name = f"{CHAR_ID_LIST[index]}.json"
+
+        file_name = f"{char_id}.json"
         complete_path = os.path.join(folder_path, file_name)
 
         logging.warning("escrevendo no caminho %s", complete_path)
@@ -107,12 +122,12 @@ def write_char(index):
             file.write(json.dumps(char))
 
     except Exception:
-        logging.error("personagem - id: %s", CHAR_ID_LIST[index])
+        logging.error("personagem - id: %s", char_id)
         traceback.print_exc()
 
 
 def write_all_chars():
-    for index in range(len(GACHABASE_URL_CHARS)):
+    for index in range(2):
         write_char(index)
 
 
@@ -128,8 +143,31 @@ def _get_char_url_list():
     return char_url_list
 
 
+def get_char_url_list():
+    try:
+        start_session()
+        logging.warning("acessando a url: %s", URL_BASE_GACHABASE + PARAM_LIST_AGENTS)
+        browser.get(URL_BASE_GACHABASE + PARAM_LIST_AGENTS)
+        time.sleep(6)
+        html_source = browser.page_source
+        soup = BeautifulSoup(html_source, "html.parser")
+        browser.quit()
+        links_list_soup = soup.find("div", id="entries").find_all("a")  # type: ignore
+        char_url_list = []
+
+        for url_char in links_list_soup:
+            char_url_list.append(url_char["href"])  # type: ignore
+
+        return char_url_list
+    except Exception:
+        logging.error("url: %s", URL_BASE_GACHABASE + PARAM_LIST_AGENTS)
+        traceback.print_exc()
+        return []
+
+
 def _request_html_content(url: str):
     resp = requests.get(url, headers=HEADERS, timeout=5)
+    time.sleep(1)
     return resp.content
 
 

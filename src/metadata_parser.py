@@ -3,7 +3,7 @@ import re
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
-from parsers.char_statsbase_parser import get_statsbase
+from char_statsbase_parser import get_statsbase
 from constants import *
 from xpath_constants import XPATH_GACHABASE_META_DATA
 
@@ -30,7 +30,7 @@ def get_metadata(browser: WebElement):
     char["id"] = _find_id(
         elements_charbase_data[1].find_element(By.XPATH, "./div").text
     )
-    char = get_statsbase(char, elements_charbase_data[2], browser)
+    char = get_statsbase(char, elements_charbase_data[3], browser)
     return char
 
 

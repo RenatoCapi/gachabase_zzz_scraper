@@ -12,9 +12,7 @@ from xpath_constants import XPATH_BASE_CHAR_LVL_SLIDER
 def get_statsbase(char, metadata_element, browser):
     stats_elements = metadata_element.find_elements(By.XPATH, "./div[3]/div/div")
     action = ActionChains(browser)
-    slider_char_lvl = metadata_element.find_element(
-        By.XPATH, XPATH_BASE_CHAR_LVL_SLIDER
-    )
+    slider_char_lvl = metadata_element.find_element(By.ID, "slider:s1:thumb:0")
 
     char["growthStat"] = get_growth_stats(stats_elements, action, slider_char_lvl)
     char["staticStats"] = get_static_stats(stats_elements)
@@ -66,7 +64,7 @@ def get_raw_lvl_stat(stats_growth_element) -> list[int]:
     lvl_stat: list[int] = []
     for index in range(3):
         span_element = stats_growth_element[index].find_elements(By.TAG_NAME, "span")
-        lvl_stat.append(int(span_element[1].text))
+        lvl_stat.append(int(span_element[1].text.rstrip("%")))
 
     return lvl_stat
 

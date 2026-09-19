@@ -1,4 +1,5 @@
 CHAR_ID_LIST = [
+    "1511",
     "1501",
     "1491",
     "1431",
@@ -50,7 +51,71 @@ CHAR_ID_LIST = [
     "1011",
 ]
 
+GACHABASE_URL_CHARS_3_1_0 = [
+    "/agents/1621/roxy/release?lang=en",
+    "/agents/1611/claret/release?lang=en",
+    "/agents/1591/sigrid/release/3.1.0/18237264?lang=en",
+    "/agents/1581/remielle/release/3.1.0/18237264?lang=en",
+    "/agents/1571/norma/release/3.1.0/18237264?lang=en",
+    "/agents/1561/velina/release/3.1.0/18237264?lang=en",
+    "/agents/1551/pyrois/release/3.1.0/18237264?lang=en",
+    "/agents/1541/promeia/release/3.1.0/18237264?lang=en",
+    "/agents/1531/starlight-billy/release/3.1.0/18237264?lang=en",
+    "/agents/1521/cissia/release/3.1.0/18237264?lang=en",
+    "/agents/1511/nangong-yu/release/3.1.0/18237264?lang=en",
+    "/agents/1501/aria/release/3.1.0/18237264?lang=en",
+    "/agents/1491/sunna/release/3.1.0/18237264?lang=en",
+    "/agents/1481/dialyn/release/3.1.0/18237264?lang=en",
+    "/agents/1471/banyue/release/3.1.0/18237264?lang=en",
+    "/agents/1461/seed/release/3.1.0/18237264?lang=en",
+    "/agents/1451/lucia/release/3.1.0/18237264?lang=en",
+    "/agents/1431/ye-shunguang/release/3.1.0/18237264?lang=en",
+    "/agents/1411/yuzuha/release/3.1.0/18237264?lang=en",
+    "/agents/1401/alice/release/3.1.0/18237264?lang=en",
+    "/agents/1391/ju-fufu/release/3.1.0/18237264?lang=en",
+    "/agents/1381/soldier-0-anby/release/3.1.0/18237264?lang=en",
+    "/agents/1371/yixuan/release/3.1.0/18237264?lang=en",
+    "/agents/1361/trigger/release/3.1.0/18237264?lang=en",
+    "/agents/1341/zhao/release/3.1.0/18237264?lang=en",
+    "/agents/1331/vivian/release/3.1.0/18237264?lang=en",
+    "/agents/1321/evelyn/release/3.1.0/18237264?lang=en",
+    "/agents/1311/astra-yao/release/3.1.0/18237264?lang=en",
+    "/agents/1301/orphie-magus/release/3.1.0/18237264?lang=en",
+    "/agents/1291/hugo/release/3.1.0/18237264?lang=en",
+    "/agents/1261/jane/release/3.1.0/18237264?lang=en",
+    "/agents/1251/qingyi/release/3.1.0/18237264?lang=en",
+    "/agents/1241/zhu-yuan/release/3.1.0/18237264?lang=en",
+    "/agents/1221/yanagi/release/3.1.0/18237264?lang=en",
+    "/agents/1211/rina/release/3.1.0/18237264?lang=en",
+    "/agents/1201/harumasa/release/3.1.0/18237264?lang=en",
+    "/agents/1191/ellen/release/3.1.0/18237264?lang=en",
+    "/agents/1181/grace/release/3.1.0/18237264?lang=en",
+    "/agents/1171/burnice/release/3.1.0/18237264?lang=en",
+    "/agents/1161/lighter/release/3.1.0/18237264?lang=en",
+    "/agents/1141/lycaon/release/3.1.0/18237264?lang=en",
+    "/agents/1101/koleda/release/3.1.0/18237264?lang=en",
+    "/agents/1091/miyabi/release/3.1.0/18237264?lang=en",
+    "/agents/1071/caesar/release/3.1.0/18237264?lang=en",
+    "/agents/1051/yidhari/release/3.1.0/18237264?lang=en",
+    "/agents/1041/soldier-11/release/3.1.0/18237264?lang=en",
+    "/agents/1021/nekomata/release/3.1.0/18237264?lang=en",
+    "/agents/1441/manato/release/3.1.0/18237264?lang=en",
+    "/agents/1421/pan-yinhu/release/3.1.0/18237264?lang=en",
+    "/agents/1351/pulchra/release/3.1.0/18237264?lang=en",
+    "/agents/1281/piper/release/3.1.0/18237264?lang=en",
+    "/agents/1271/seth/release/3.1.0/18237264?lang=en",
+    "/agents/1151/lucy/release/3.1.0/18237264?lang=en",
+    "/agents/1131/soukaku/release/3.1.0/18237264?lang=en",
+    "/agents/1121/ben/release/3.1.0/18237264?lang=en",
+    "/agents/1111/anton/release/3.1.0/18237264?lang=en",
+    "/agents/1081/billy/release/3.1.0/18237264?lang=en",
+    "/agents/1061/corin/release/3.1.0/18237264?lang=en",
+    "/agents/1031/nicole/release/3.1.0/18237264?lang=en",
+    "/agents/1011/anby/release/3.1.0/18237264?lang=en",
+]
+
 GACHABASE_URL_CHARS = [
+    "/agents/1511/nangong-yu?lang=en&branch=release",
     "/agents/1501/aria?lang=en&branch=release",
     "/agents/1491/sunna?lang=en&branch=release",
     "/agents/1431/ye-shunguang?lang=en&branch=release",
@@ -104,7 +169,7 @@ GACHABASE_URL_CHARS = [
 
 URL_BASE_GACHABASE = "https://zzz.gachabase.net"
 
-PARAM_LIST_AGENTS = "agents?lang=en&branch=release"
+PARAM_LIST_AGENTS = "/agents/release/3.1.0/18237264?lang=en"
 
 HEADERS = {
     "user-agent": (
@@ -126,6 +191,7 @@ WEAPON_TYPE_ID = {
     "Support": "4",
     "Defense": "5",
     "Rupture": "6",
+    "Armorer": "7",
 }
 
 HIT_TYPE_ID = {
@@ -141,8 +207,10 @@ ELEMENT_TYPE_ID = {
     "Ice": "202",
     "Frost": "202",
     "Electric": "203",
+    "Wind": "204",
     "Ether": "205",
     "Auric Ink": "205",
+    "Lumiflux": "300",
 }
 
 CAMP_ID = {
@@ -153,13 +221,17 @@ CAMP_ID = {
     "sons": "4",
     "defense": "5",
     "hollow": "6",
-    "criminal": "7",
+    "public": "7",
     "stars": "8",
     "mockingbird": "9",
     "yunkui": "10",
     "spook": "11",
     "krampus": "12",
     "angels": "13",
+    "phaethon": "14",
+    "roscaelifer": "15",
+    "covenant": "16",
+    "airspace": "17",
 }
 
 STATS_BASE_ID = {
@@ -174,10 +246,12 @@ STATS_BASE_ID = {
     "CRIT Rate": "20101",
     "CRIT DMG": "21101",
     "PEN Ratio": "23101",
-    "Anomaly Mastery": "31201",
-    "Anomaly Proficiency": "31401",
+    "Anomaly Mastery": "31401",
+    "Anomaly Proficiency": "31201",
     "Sheer Force": "12301",
     "Automatic Adrenaline Accumulation": "32001",
+    "Laceration DMG": "21301",
+    "Automatic Sharpness Accumulation": "32401",
 }
 
 STATS_FLOAT_ROUND = [
@@ -189,6 +263,7 @@ STATS_FLOAT_ROUND = [
     "11102",
     "12102",
     "13102",
+    "21301",
 ]
 
 BASE_ATTR_ID = ["11101", "12101", "13101"]

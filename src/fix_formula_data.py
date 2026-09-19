@@ -46,6 +46,27 @@ def fix_all_chars_formulas():
         # break
 
 
+def build_game_data():
+    search_pattern = os.path.join(
+        "/mnt/g/projetos/Projects/Gamegacha_scraper/output/tests", "*.json"
+    )
+
+    file_names = glob.glob(search_pattern)
+
+    output = {}
+    for file_name in file_names:
+        with open(file_name, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            output[data["id"]] = data
+
+    output_path = os.path.join(
+        "/mnt/g/projetos/Projects/Gamegacha_scraper/output/tests/game_data.json"
+    )
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(json.dumps(output))
+
+
 def data_permutation(data):
     hit_map = data["hitMap"]
     logging.info(data["name"])
@@ -178,3 +199,4 @@ def str_multiplier(lvl1_str, lvl16_str) -> dict[str, int]:
 
 if __name__ == "__main__":
     fix_all_chars_formulas()
+    # build_game_data()

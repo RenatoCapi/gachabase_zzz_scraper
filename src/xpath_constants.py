@@ -2,10 +2,10 @@ GAMEGACHA_SKILL_MAP = [0, 2, 6, 1, 3, 5]
 
 
 GAMEGACHA_SKILLS_SECTION_MAP = ["BASIC", "DODGE", "ASSIST", "SPECIAL", "CHAIN"]
+XPATH_CLOSE_BUTTON_1 = "/html/body/div[7]/div/div/button"
+XPATH_CLOSE_BUTTON_2 = "/html/body/div[5]/div/div/button"
 
-XPATH_CLOSE_BUTTON = "/html/body/div[9]/div/div/button"
-
-XPATH_BASE_GACHABASE_SKILLS = "/html/body/div[1]/div[1]/main/article/section[2]"
+XPATH_BASE_GACHABASE_SKILLS = "/html/body/main/div[1]/main/article/section[2]"
 
 
 # XPATH_BASE_GAMEGACHA_SKILLS /
@@ -19,16 +19,20 @@ XPATH_SKILL_DESCS = "./div[2]/div[1]"
 # get_skill_xpath() /
 XPATH_SUB_SKILLS_DATA = "./div[2]/div[2]/div/div"
 
+# get_skill_xpath() /
+XPATH_SUMMARY_BUTTON = "./div[2]/div[2]/summary"
+
 # XPATH_SUB_SKILLS_DATA /
-XPATH_SLIDER_KNOB = "./div/div[2]/div/div[2]"
+XPATH_SLIDER_KNOB = "./div/div/div/div[2]"
 
+# "/html/body/main/div[1]/main/article/section[2]/div/section[1]/div[2]/div[2]/div/div[1]/div/div/div/div[2]"
+# "/html/body/main/div[1]/main/article/section[2]/div/section[1]/div[2]/div[2]/div/div[3]"
+# "/html/body/main/div[1]/main/article/section[2]/div/section[1]/div[1]"
+# "/html/body/main/div[1]/main/article/section[2]/div/section[1]/div[1]/h3/div[2]/div/div/div/div[2]"
 
-XPATH_GACHABASE_META_DATA = (
-    "/html/body/div[1]/div[1]/main/article/section[1]/div[2]/div"
-)
+XPATH_GACHABASE_META_DATA = "/html/body/main/div[1]/main/article/section[1]/div[2]/div"
 
 # XPATH_BASE_GACHABASE_META_DATA /
-XPATH_BASE_CHAR_LVL_SLIDER = "./div[1]/div[2]/div/div[2]"
+XPATH_BASE_CHAR_LVL_SLIDER = "./div[4]/div[1]/div/div/div[2]"
 XPATH_BASESTATS = "./div[3]/div"
-
-XPATH_CORE = "/html/body/div[1]/div[1]/main/article/section[3]/div/section/div[2]"
+XPATH_CORE = "/html/body/main/div[1]/main/article/section[3]/div/section/div[2]"

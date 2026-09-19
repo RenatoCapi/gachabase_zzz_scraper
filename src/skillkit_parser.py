@@ -49,12 +49,18 @@ def _get_skill_data(skill_id: int):
 
 
 def _get_sub_skills_data(element_skills):
+    logging.info("encontrando o botão de summary da skill e clicando...")
+    sub_skills_summary_button = element_skills.find_element(
+        By.XPATH, XPATH_SUMMARY_BUTTON
+    )
+    action = ActionChains(browser)
+    sub_skills_summary_button.click()
+
     sub_skills_data = element_skills.find_elements(By.XPATH, XPATH_SUB_SKILLS_DATA)
     sub_skills = {}
 
     logging.info("iniciando manipulação do slider de lvl...")
     slider = sub_skills_data[0].find_element(By.XPATH, XPATH_SLIDER_KNOB)
-    action = ActionChains(browser)
 
     _slider_move(action, slider, Keys.ARROW_LEFT)
     _get_sub_skills_per_lvl(sub_skills_data, sub_skills)
@@ -103,15 +109,15 @@ def _get_complex_hits_data(sub_skill_data, sub_skill_id, sub_skill):
     for tr in tr_elements:
         complex_hit_id = ""
         html_tr = tr.get_attribute("outerHTML")
-        tds_soup = BeautifulSoup(html_tr, "html.parser").find_all("td")
-        spans_name_soup = tds_soup[0].find_all("span")
+        spans_name_soup = BeautifulSoup(html_tr, "html.parser").find_all("span")
+        # spans_name_soup = span_soup[0].find_all("span")
 
         if len(spans_name_soup) < 2:
             continue
 
         raw_name = find_hit_complex_id(spans_name_soup[0].get_text(strip=True))  # type: ignore
         raw_ids = spans_name_soup[1].get_text(strip=True).split(", ")
-        formula_result = tds_soup[1].contents[2].span.get_text(strip=True)  # type: ignore
+        formula_result = spans_name_soup[2].get_text(strip=True)  # type: ignore
 
         if not raw_name[1]:
             continue
