@@ -1,9 +1,15 @@
-from gachabase_webscraper import get_char_url_list, write_all_chars, write_char
+from gachabase_webscraper import (
+    get_char_url_list,
+    get_wengines_url_list,
+    write_all_chars,
+    write_char,
+)
 
 
 def main():
     # get_char_url_list()
-    write_char(1)
+    print(get_wengines_url_list())
+    # write_char(1)
     # write_all_chars()
 
 

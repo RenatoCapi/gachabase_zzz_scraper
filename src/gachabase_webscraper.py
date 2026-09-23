@@ -5,11 +5,9 @@ import re
 import sys
 import time
 import traceback
-from warnings import catch_warnings
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
@@ -39,7 +37,7 @@ def start_session():
 
 
 def _get_char(char_url):
-    load_character_page(char_url)
+    load_page(URL_BASE_GACHABASE + char_url)
     close_dialog("dialog:s21:close")
     close_dialog("dialog:s20:close")
 
@@ -80,13 +78,13 @@ def _get_core(char):
     return char
 
 
-def load_character_page(char_url):
+def load_page(url):
     try:
         start_session()
-        logging.warning("acessando a url: %s", URL_BASE_GACHABASE + char_url)
-        browser.get(URL_BASE_GACHABASE + char_url)
+        logging.warning("acessando a url: %s", url)
+        browser.get(url)
     except Exception:
-        logging.error("personagem - url: %s", URL_BASE_GACHABASE + char_url)
+        logging.error("url: %s", url)
         traceback.print_exc()
 
 
@@ -98,19 +96,16 @@ def close_dialog(xpath_button):
         )
 
         close_button.click()
-        # close_button = browser.find_element(By.XPATH, xpath_button)
-        # action = ActionChains(browser)
-        # action.click(close_button).perform()
     except Exception:
         traceback.print_exc()
 
 
 def write_char(index):
     pattern_char_id = r"/agents/(\d{4})/"
-    match_char_id = re.search(pattern_char_id, GACHABASE_URL_CHARS_3_1_0[index])
+    match_char_id = re.search(pattern_char_id, GACHABASE_URL_CHARS[index])
     char_id = match_char_id.group(1)  # type: ignore
     try:
-        char = _get_char(GACHABASE_URL_CHARS_3_1_0[index])
+        char = _get_char(GACHABASE_URL_CHARS[index])
         folder_path = "/app/output"
 
         file_name = f"{char_id}.json"
