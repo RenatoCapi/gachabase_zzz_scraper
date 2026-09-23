@@ -136,6 +136,7 @@ STATS_BASE_ID = {
     "Percent DEF": "13102",
     "Base Impact": "12201",
     "Base Energy Regen": "30501",
+    "Energy Regen": "30502",
     "CRIT Rate": "20101",
     "CRIT DMG": "21101",
     "PEN Ratio": "23101",
@@ -149,6 +150,7 @@ STATS_BASE_ID = {
 
 STATS_FLOAT_ROUND = [
     "30501",
+    "30502",
     "20101",
     "21101",
     "23101",

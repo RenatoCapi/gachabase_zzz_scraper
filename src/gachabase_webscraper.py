@@ -19,11 +19,11 @@ from constants import *
 from util import float_to_int, text_to_float
 from xpath_constants import *
 
-logging.basicConfig(
-    stream=sys.stdout,
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-)
+# logging.basicConfig(
+#     stream=sys.stdout,
+#     level=logging.INFO,
+#     format="%(asctime)s - %(levelname)s - %(message)s",
+# )
 
 
 def start_session():
@@ -90,7 +90,7 @@ def load_page(url):
 
 def close_dialog(xpath_button):
     try:
-        logging.info("tentando fechar o botão " + xpath_button)
+        logging.info("tentando fechar o botão %s", xpath_button)
         close_button = WebDriverWait(browser, 5).until(
             EC.element_to_be_clickable((By.ID, xpath_button))
         )

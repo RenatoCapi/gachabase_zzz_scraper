@@ -107,22 +107,13 @@ PARAM_LIST_WENGINE = "/w-engines/release?lang=en"
 # X_PATHS
 
 IMAGE_XPATH = "/html/body/main/div[1]/main/article/section[1]/div[1]/div/img"
-
 BASEDATA_XPATH = "/html/body/main/div[1]/main/article/section[1]/div[2]/div"
 
 # BASEDATA_XPATH/
-
 NAME_XPATH = "./div[1]/div/h1/span"
-
 METADATA_XPATH = "./div[2]"
+STATS_BASE_XPATH = "./div[4]/div[2]/div/div"
+EFFECT_XPATH = "./div[4]/section/div/section/div"
 
-STATS_BASE_XPATH = "./div[4]/div[2]/div"
-
-POTENCIAL_XPATH = "./div[4]/section/div/section/div[1]/h3/div[2]/div/"
-
-
-def get_potencial(lvl: int):
-    return f"./{POTENCIAL_XPATH}/button[{lvl}]"
-
-
-EFFECT_XPATH = "./div[4]/section/div/section/div[2]/span"
+# EFFECT_XPATH/
+POTENCIAL_BUTTON5_XPATH = "./h3/div[2]/div/button[5]"

@@ -25,11 +25,6 @@ XPATH_SUMMARY_BUTTON = "./div[2]/div[2]/summary"
 # XPATH_SUB_SKILLS_DATA /
 XPATH_SLIDER_KNOB = "./div/div/div/div[2]"
 
-# "/html/body/main/div[1]/main/article/section[2]/div/section[1]/div[2]/div[2]/div/div[1]/div/div/div/div[2]"
-# "/html/body/main/div[1]/main/article/section[2]/div/section[1]/div[2]/div[2]/div/div[3]"
-# "/html/body/main/div[1]/main/article/section[2]/div/section[1]/div[1]"
-# "/html/body/main/div[1]/main/article/section[2]/div/section[1]/div[1]/h3/div[2]/div/div/div/div[2]"
-
 XPATH_GACHABASE_META_DATA = "/html/body/main/div[1]/main/article/section[1]/div[2]/div"
 
 # XPATH_BASE_GACHABASE_META_DATA /
