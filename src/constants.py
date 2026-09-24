@@ -75,6 +75,7 @@ HEADERS = {
 RARITY_ID = {
     "S Rank": "4",
     "A Rank": "3",
+    "B Rank": "2",
 }
 
 WEAPON_TYPE_ID = {

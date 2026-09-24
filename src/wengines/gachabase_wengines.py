@@ -1,6 +1,6 @@
 import json
-import logging
 import os
+from pathlib import Path
 import re
 import shutil
 import time
@@ -12,6 +12,7 @@ from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 
 from gachabase_webscraper import start_session
+import logger_provider
 from util import find_wengine_id, float_to_int, text_to_float
 from wengines.wengine_constants import (
     BASEDATA_XPATH,
@@ -35,12 +36,14 @@ from constants import (
 )
 from xpath_constants import XPATH_CLOSE_BUTTON_1, XPATH_CLOSE_BUTTON_2
 
-WENGINES_FOLDER = "/app/output/wengines"
-WENGINES_ICON_FOLDER = WENGINES_FOLDER + "/wengine_icons"
+logger = logger_provider.get_logger()
+
+WENGINES_FOLDER = "/app/output/wengines/wengines_data"
+WENGINES_ICON_FOLDER = "/app/output/wengines/wengines_icon"
 
 
 def write_all_wengines():
-    for url in GACHABASE_URL_WENGINES[12:]:
+    for url in GACHABASE_URL_WENGINES:
         _write_wengine_file(url)
 
 
@@ -59,13 +62,13 @@ def _write_wengine_file(wengine_url):
         file_name = f"{wengine_id}.json"
         complete_path = os.path.join(WENGINES_FOLDER, file_name)
 
-        logging.warning("escrevendo no caminho %s", complete_path)
+        logger.warning("escrevendo no caminho %s", complete_path)
 
         with open(complete_path, "w", encoding="utf-8") as file:
             file.write(json.dumps(wengine))
 
     except Exception:
-        logging.error("wengine - id: %s", wengine_id)
+        logger.error("wengine - id: %s", wengine_id)
         traceback.print_exc()
 
 
@@ -86,8 +89,7 @@ def try_click_buttom(browser, xpath):
             click_on_button(button)
 
     except Exception:
-        logging.warning("erro ao clicar no botão: %s", xpath)
-        traceback.print_exc()
+        logger.warning("erro ao clicar no botão: %s", xpath)
 
 
 def _get_wengine_metadata(browser):
@@ -160,14 +162,14 @@ def _img_url(browser: WebDriver, wengine_id: str):
         file_name = f"wengine_{wengine_id}.png"
         complete_path = os.path.join(WENGINES_ICON_FOLDER, file_name)
 
-        logging.warning("escrevendo imagem no caminho %s", complete_path)
+        logger.warning("escrevendo imagem no caminho %s", complete_path)
 
         with open(complete_path, "wb") as file:
             shutil.copyfileobj(response.raw, file)
 
         return file_name
     except Exception:
-        logging.error("erro ao salvar o png!")
+        logger.error("erro ao salvar o png!")
         traceback.print_exc()
         return ""
 
@@ -175,7 +177,7 @@ def _img_url(browser: WebDriver, wengine_id: str):
 def _get_wengines_url_list(browser):
     try:
         start_session()
-        logging.warning("acessando a url: %s", URL_BASE_GACHABASE + PARAM_LIST_WENGINE)
+        logger.warning("acessando a url: %s", URL_BASE_GACHABASE + PARAM_LIST_WENGINE)
         browser.get(URL_BASE_GACHABASE + PARAM_LIST_WENGINE)
         time.sleep(6)
         html_source = browser.page_source
@@ -188,7 +190,7 @@ def _get_wengines_url_list(browser):
             wengine_url_list.append(url_char["href"])  # type: ignore
 
         return wengine_url_list
-    except Exception:
-        logging.error("url: %s", URL_BASE_GACHABASE + PARAM_LIST_WENGINE)
+    except Exception as e:
+        logger.error("url: %s - %s", URL_BASE_GACHABASE + PARAM_LIST_WENGINE, e)
         traceback.print_exc()
         return []
